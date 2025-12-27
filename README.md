@@ -19,12 +19,19 @@ Construir una base clara y ordenada para una aplicación web que:
 
 ## Estructura prevista
 Colmena-Unidos/
+
 ├── index.html
+
 ├── css/
+
 │ └── style.css
+
 ├── js/
+
 │ └── app.js
+
 └── README.md
+
 
 ## Nota
 Este repositorio se usa para pruebas, aprendizaje y organización de ideas antes de pasar a una versión final.
