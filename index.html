@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#111827" />
+  <title>Colmena Unidos | Editor de Recintos</title>
+  <meta name="description" content="Editor visual de recintos para eventos: sillas, mesas, escenarios, zonas y preparación de venta de entradas." />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/main.css?v=1" />
+
+  <!-- Favicons opcionales (puedes añadirlos después) -->
+  <!-- <link rel="icon" href="assets/favicon.ico" /> -->
+</head>
+
+<body>
+  <!-- =========================================================
+       HEADER / TOP BAR
+  ========================================================== -->
+  <header class="topbar" id="topbar">
+    <div class="topbar__left">
+      <div class="brand" aria-label="Marca">
+        <div class="brand__logo" aria-hidden="true">CU</div>
+        <div class="brand__text">
+          <div class="brand__title">Colmena Unidos</div>
+          <div class="brand__subtitle">Editor de Recintos</div>
+        </div>
+      </div>
+
+      <div class="project-meta" aria-label="Información del proyecto">
+        <div class="project-meta__item">
+          <span class="badge" id="appStatusBadge">MVP</span>
+        </div>
+        <div class="project-meta__item">
+          <span class="muted">Evento:</span>
+          <strong id="eventNameLabel">Sin nombre</strong>
+        </div>
+        <div class="project-meta__item">
+          <span class="muted">Modo:</span>
+          <strong id="modeLabel">Edición</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="topbar__right">
+      <button class="btn btn--ghost" id="btnHelp" type="button" title="Ayuda (atajos y guía)">
+        Ayuda
+      </button>
+
+      <button class="btn btn--ghost" id="btnShortcuts" type="button" title="Ver atajos de teclado">
+        Atajos
+      </button>
+
+      <div class="divider" aria-hidden="true"></div>
+
+      <button class="btn btn--ghost" id="btnUndo" type="button" title="Deshacer (Ctrl+Z)">
+        Deshacer
+      </button>
+      <button class="btn btn--ghost" id="btnRedo" type="button" title="Rehacer (Ctrl+Y)">
+        Rehacer
+      </button>
+
+      <div class="divider" aria-hidden="true"></div>
+
+      <button class="btn" id="btnSave" type="button" title="Guardar diseño en este navegador">
+        Guardar
+      </button>
+      <button class="btn btn--ghost" id="btnLoad" type="button" title="Cargar el último diseño guardado">
+        Cargar
+      </button>
+
+      <button class="btn btn--danger" id="btnClear" type="button" title="Limpiar todo el plano">
+        Limpiar
+      </button>
+    </div>
+  </header>
+
+  <!-- =========================================================
+       MAIN LAYOUT
+  ========================================================== -->
+  <div class="app" id="appRoot">
+    <!-- =======================================================
+         LEFT SIDEBAR: TOOLS + SETTINGS
+    ======================================================== -->
+    <aside class="sidebar" id="leftSidebar" aria-label="Herramientas y configuración">
+      <section class="panel">
+        <div class="panel__header">
+          <h2 class="panel__title">Herramientas</h2>
+          <p class="panel__hint">Selecciona y pinta sobre el plano.</p>
+        </div>
+
+        <div class="toolgrid" role="group" aria-label="Selector de herramienta">
+          <button class="tool" id="toolSeat" type="button" data-tool="seat" aria-pressed="true" title="Silla">
+            <span class="tool__icon" aria-hidden="true">🟩</span>
+            <span class="tool__label">Silla</span>
+          </button>
+
+          <button class="tool" id="toolTable" type="button" data-tool="table" aria-pressed="false" title="Mesa">
+            <span class="tool__icon" aria-hidden="true">🟦</span>
+            <span class="tool__label">Mesa</span>
+          </button>
+
+          <button class="tool" id="toolStage" type="button" data-tool="stage" aria-pressed="false" title="Escenario">
+            <span class="tool__icon" aria-hidden="true">🟧</span>
+            <span class="tool__label">Escenario</span>
+          </button>
+
+          <button class="tool" id="toolWall" type="button" data-tool="wall" aria-pressed="false" title="Bloque/Obstáculo">
+            <span class="tool__icon" aria-hidden="true">⬛</span>
+            <span class="tool__label">Bloque</span>
+          </button>
+
+          <button class="tool" id="toolAisle" type="button" data-tool="aisle" aria-pressed="false" title="Pasillo">
+            <span class="tool__icon" aria-hidden="true">⬜</span>
+            <span class="tool__label">Pasillo</span>
+          </button>
+
+          <button class="tool tool--danger" id="toolErase" type="button" data-tool="erase" aria-pressed="false" title="Borrar">
+            <span class="tool__icon" aria-hidden="true">🧽</span>
+            <span class="tool__label">Borrar</span>
+          </button>
+        </div>
+
+        <div class="panel__footer">
+          <div class="row row--gap">
+            <button class="btn btn--ghost" id="btnSelectMode" type="button" title="Modo selección (seleccionar celdas)">
+              Modo Selección
+            </button>
+            <button class="btn btn--ghost" id="btnPaintMode" type="button" title="Modo pintar (herramientas)">
+              Modo Pintar
+            </button>
+          </div>
+
+          <div class="row row--gap">
+            <label class="check">
+              <input id="chkShowNumbers" type="checkbox" checked />
+              <span>Mostrar números</span>
+            </label>
+            <label class="check">
+              <input id="chkSnap" type="checkbox" checked />
+              <span>Snap</span>
+            </label>
+          </div>
+
+          <div class="row row--gap">
+            <label class="check">
+              <input id="chkAutoNumber" type="checkbox" checked />
+              <span>Auto-numerar</span>
+            </label>
+            <label class="check">
+              <input id="chkContinuousPaint" type="checkbox" checked />
+              <span>Pintar arrastrando</span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel__header">
+          <h2 class="panel__title">Plano</h2>
+          <p class="panel__hint">Tamaño del grid y configuración.</p>
+        </div>
+
+        <div class="form">
+          <div class="field">
+            <label for="eventNameInput">Nombre del evento</label>
+            <input id="eventNameInput" type="text" placeholder="Ej: Boxeo - Noche de Campeones" maxlength="80" />
+          </div>
+
+          <div class="field field--two">
+            <div>
+              <label for="rowsInput">Filas</label>
+              <input id="rowsInput" type="number" min="5" max="80" value="25" />
+            </div>
+            <div>
+              <label for="colsInput">Columnas</label>
+              <input id="colsInput" type="number" min="5" max="80" value="25" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="gridPreset">Preset</label>
+            <select id="gridPreset">
+              <option value="custom" selected>Personalizado</option>
+              <option value="small">Pequeño (15x15)</option>
+              <option value="medium">Medio (25x25)</option>
+              <option value="large">Grande (35x35)</option>
+              <option value="wide_stage">Con escenario frontal (25x35)</option>
+              <option value="ring_center">Ring/centro (30x30)</option>
+            </select>
+          </div>
+
+          <div class="row row--gap">
+            <button class="btn" id="btnApplyGrid" type="button">Aplicar tamaño</button>
+            <button class="btn btn--ghost" id="btnCenterView" type="button">Centrar vista</button>
+          </div>
+
+          <div class="row row--gap">
+            <button class="btn btn--ghost" id="btnZoomOut" type="button">Zoom -</button>
+            <button class="btn btn--ghost" id="btnZoomReset" type="button">Zoom 100%</button>
+            <button class="btn btn--ghost" id="btnZoomIn" type="button">Zoom +</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel__header">
+          <h2 class="panel__title">Zonas y precios</h2>
+          <p class="panel__hint">Preparación de venta (sin cobrar todavía).</p>
+        </div>
+
+        <div class="form">
+          <div class="field">
+            <label for="zoneSelect">Zona activa</label>
+            <select id="zoneSelect">
+              <option value="none" selected>Sin zona</option>
+              <option value="vip">VIP</option>
+              <option value="preferencial">Preferencial</option>
+              <option value="general">General</option>
+              <option value="balcon">Balcón</option>
+            </select>
+          </div>
+
+          <div class="field field--two">
+            <div>
+              <label for="priceSeatInput">Precio silla</label>
+              <input id="priceSeatInput" type="number" min="0" step="500" value="20000" />
+            </div>
+            <div>
+              <label for="priceTableInput">Precio mesa</label>
+              <input id="priceTableInput" type="number" min="0" step="500" value="80000" />
+            </div>
+          </div>
+
+          <div class="row row--gap">
+            <button class="btn btn--ghost" id="btnAssignZone" type="button" title="Asignar zona a selección">
+              Asignar zona
+            </button>
+            <button class="btn btn--ghost" id="btnClearZone" type="button" title="Quitar zona de selección">
+              Quitar zona
+            </button>
+          </div>
+
+          <div class="note">
+            Consejo: usa <strong>Modo Selección</strong> para seleccionar varias celdas y luego asigna zona.
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel__header">
+          <h2 class="panel__title">Exportar / Importar</h2>
+          <p class="panel__hint">Para compartir el plano o usarlo luego en backend.</p>
+        </div>
+
+        <div class="row row--gap">
+          <button class="btn" id="btnExportJSON" type="button">Exportar JSON</button>
+          <button class="btn btn--ghost" id="btnImportJSON" type="button">Importar JSON</button>
+        </div>
+
+        <div class="row row--gap">
+          <button class="btn btn--ghost" id="btnExportCSV" type="button">Exportar CSV</button>
+          <button class="btn btn--ghost" id="btnPrint" type="button">Imprimir</button>
+        </div>
+
+        <div class="note">
+          Exportar no vende entradas; solo genera el diseño con datos (asiento, zona, precio base).
+        </div>
+      </section>
+    </aside>
+
+    <!-- =======================================================
+         CENTER: CANVAS + GRID
+    ======================================================== -->
+    <main class="workspace" id="workspace" aria-label="Área de trabajo">
+      <div class="workspace__top">
+        <div class="stats" id="statsBar" aria-label="Estadísticas del plano">
+          <div class="stat">
+            <span class="stat__label">Sillas</span>
+            <span class="stat__value" id="statSeats">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Mesas</span>
+            <span class="stat__value" id="statTables">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Capacidad</span>
+            <span class="stat__value" id="statCapacity">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Seleccionadas</span>
+            <span class="stat__value" id="statSelected">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat__label">Zona activa</span>
+            <span class="stat__value" id="statZone">—</span>
+          </div>
+        </div>
+
+        <div class="workspace__actions">
+          <button class="btn btn--ghost" id="btnToggleGridLines" type="button" title="Mostrar/ocultar líneas del grid">
+            Líneas
+          </button>
+          <button class="btn btn--ghost" id="btnToggleLegend" type="button" title="Mostrar/ocultar leyenda">
+            Leyenda
+          </button>
+        </div>
+      </div>
+
+      <div class="canvaswrap" id="canvasWrap">
+        <div class="legend" id="legend" aria-label="Leyenda">
+          <div class="legend__item"><span class="chip chip--seat"></span> Silla</div>
+          <div class="legend__item"><span class="chip chip--table"></span> Mesa</div>
+          <div class="legend__item"><span class="chip chip--stage"></span> Escenario</div>
+          <div class="legend__item"><span class="chip chip--wall"></span> Bloque</div>
+          <div class="legend__item"><span class="chip chip--aisle"></span> Pasillo</div>
+          <div class="legend__item"><span class="chip chip--selected"></span> Selección</div>
+        </div>
+
+        <!-- GRID -->
+        <section class="grid" id="grid" aria-label="Plano del recinto" tabindex="0">
+          <!-- Se genera por JS -->
+        </section>
+      </div>
+
+      <div class="workspace__bottom">
+        <div class="hintbar" id="hintBar">
+          <span id="hintText">Consejo: selecciona una herramienta y haz clic/arrastra sobre el plano.</span>
+        </div>
+        <div class="statusbar" id="statusBar">
+          <span class="muted">Archivo:</span> <span id="saveStateLabel">Sin guardar</span>
+          <span class="dot" aria-hidden="true">•</span>
+          <span class="muted">Última acción:</span> <span id="lastActionLabel">—</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- =======================================================
+         RIGHT SIDEBAR: INSPECTOR / DETAILS
+    ======================================================== -->
+    <aside class="sidebar sidebar--right" id="rightSidebar" aria-label="Inspector">
+      <section class="panel">
+        <div class="panel__header">
+          <h2 class="panel__title">Inspector</h2>
+          <p class="panel__hint">Detalles de la celda / selección.</p>
+        </div>
+
+        <div class="inspector">
+          <div class="inspector__row">
+            <span class="muted">Tipo</span>
+            <strong id="inspType">—</strong>
+          </div>
+          <div class="inspector__row">
+            <span class="muted">Asiento #</span>
+            <strong id="inspSeatNumber">—</strong>
+          </div>
+          <div class="inspector__row">
+            <span class="muted">Zona</span>
+            <strong id="inspZone">—</strong>
+          </div>
+          <div class="inspector__row">
+            <span class="muted">Precio</span>
+            <strong id="inspPrice">—</strong>
+          </div>
+
+          <hr class="hr" />
+
+          <div class="field">
+            <label for="inspPriceInput">Precio personalizado (selección)</label>
+            <input id="inspPriceInput" type="number" min="0" step="500" placeholder="Ej: 25000" />
+          </div>
+
+          <div class="row row--gap">
+            <button class="btn btn--ghost" id="btnApplyPrice" type="button">Aplicar precio</button>
+            <button class="btn btn--ghost" id="btnClearPrice" type="button">Quitar precio</button>
+          </div>
+
+          <hr class="hr" />
+
+          <div class="field">
+            <label for="sellModeSelect">Estado de venta (simulación)</label>
+            <select id="sellModeSelect">
+              <option value="available" selected>Disponible</option>
+              <option value="reserved">Reservado</option>
+              <option value="sold">Vendido</option>
+              <option value="blocked">Bloqueado</option>
+            </select>
+          </div>
+
+          <div class="row row--gap">
+            <button class="btn btn--ghost" id="btnApplySellState" type="button">Aplicar estado</button>
+            <button class="btn btn--ghost" id="btnResetSellState" type="button">Reset estado</button>
+          </div>
+
+          <div class="note">
+            Esto es “preparación de venta”: no cobra, pero estructura la data para cuando exista checkout.
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel__header">
+          <h2 class="panel__title">Checklist MVP</h2>
+          <p class="panel__hint">Lo que debe quedar listo antes de “vender”.</p>
+        </div>
+
+        <ol class="checklist" id="mvpChecklist">
+          <li><input type="checkbox" id="chkMvp1" /> <label for="chkMvp1">Plano editable (ok)</label></li>
+          <li><input type="checkbox" id="chkMvp2" /> <label for="chkMvp2">Numeración de asientos</label></li>
+          <li><input type="checkbox" id="chkMvp3" /> <label for="chkMvp3">Zonas + precios</label></li>
+          <li><input type="checkbox" id="chkMvp4" /> <label for="chkMvp4">Capacidad calculada</label></li>
+          <li><input type="checkbox" id="chkMvp5" /> <label for="chkMvp5">Exportación JSON</label></li>
+        </ol>
+
+        <div class="note">
+          Cuando esto esté completo, el equipo puede iniciar “preparar venta” (frontend cliente + backend).
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <!-- =========================================================
+       DIALOGS / MODALS
+  ========================================================== -->
+
+  <!-- Export JSON Modal -->
+  <dialog class="modal" id="modalExport">
+    <form method="dialog" class="modal__card">
+      <div class="modal__header">
+        <h3>Exportar diseño</h3>
+        <button class="iconbtn" value="cancel" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="modal__body">
+        <p class="muted">Copia o descarga el JSON del layout.</p>
+
+        <div class="row row--gap">
+          <button class="btn" id="btnDownloadJSON" type="button">Descargar .json</button>
+          <button class="btn btn--ghost" id="btnCopyJSON" type="button">Copiar</button>
+        </div>
+
+        <label for="exportTextarea" class="muted" style="display:block;margin-top:10px;">JSON</label>
+        <textarea id="exportTextarea" class="codebox" spellcheck="false"></textarea>
+      </div>
+
+      <div class="modal__footer">
+        <button class="btn btn--ghost" value="cancel">Cerrar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Import JSON Modal -->
+  <dialog class="modal" id="modalImport">
+    <form method="dialog" class="modal__card">
+      <div class="modal__header">
+        <h3>Importar diseño</h3>
+        <button class="iconbtn" value="cancel" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="modal__body">
+        <p class="muted">Pega el JSON exportado para reconstruir el layout.</p>
+
+        <label for="importTextarea" class="muted" style="display:block;margin-top:10px;">JSON</label>
+        <textarea id="importTextarea" class="codebox" spellcheck="false"></textarea>
+
+        <div class="row row--gap" style="margin-top:10px;">
+          <button class="btn" id="btnApplyImport" type="button">Importar</button>
+          <button class="btn btn--ghost" id="btnCancelImport" type="button">Cancelar</button>
+        </div>
+      </div>
+
+      <div class="modal__footer">
+        <button class="btn btn--ghost" value="cancel">Cerrar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Help Modal -->
+  <dialog class="modal" id="modalHelp">
+    <form method="dialog" class="modal__card">
+      <div class="modal__header">
+        <h3>Ayuda</h3>
+        <button class="iconbtn" value="cancel" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="modal__body">
+        <p>
+          Este editor sirve para diseñar recintos de eventos (sillas, mesas, escenario) y preparar la estructura de venta.
+          Primero construyes el plano; después se exporta y se usa para tickets y pagos.
+        </p>
+
+        <ul>
+          <li>Elige una herramienta y pinta sobre el plano.</li>
+          <li>Activa “Auto-numerar” para numeración automática de sillas.</li>
+          <li>Usa “Modo Selección” para seleccionar varios elementos y asignar zona/precio.</li>
+          <li>Guarda para no perder el trabajo.</li>
+        </ul>
+      </div>
+
+      <div class="modal__footer">
+        <button class="btn btn--ghost" value="cancel">Cerrar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Shortcuts Modal -->
+  <dialog class="modal" id="modalShortcuts">
+    <form method="dialog" class="modal__card">
+      <div class="modal__header">
+        <h3>Atajos</h3>
+        <button class="iconbtn" value="cancel" aria-label="Cerrar">✕</button>
+      </div>
+
+      <div class="modal__body">
+        <ul class="kbdlist">
+          <li><kbd>1</kbd> Silla</li>
+          <li><kbd>2</kbd> Mesa</li>
+          <li><kbd>3</kbd> Escenario</li>
+          <li><kbd>4</kbd> Bloque</li>
+          <li><kbd>5</kbd> Pasillo</li>
+          <li><kbd>E</kbd> Borrar</li>
+          <li><kbd>S</kbd> Guardar</li>
+          <li><kbd>L</kbd> Cargar</li>
+          <li><kbd>Ctrl</kbd> + <kbd>Z</kbd> Deshacer</li>
+          <li><kbd>Ctrl</kbd> + <kbd>Y</kbd> Rehacer</li>
+        </ul>
+      </div>
+
+      <div class="modal__footer">
+        <button class="btn btn--ghost" value="cancel">Cerrar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- =========================================================
+       NOSCRIPT FALLBACK
+  ========================================================== -->
+  <noscript>
+    <div class="noscript">
+      Este proyecto requiere JavaScript para funcionar. Actívalo en tu navegador.
+    </div>
+  </noscript>
+
+  <!-- =========================================================
+       JS ENTRYPOINT (MODULE)
+  ========================================================== -->
+  <script type="module" src="js/app.js?v=1"></script>
+</body>
+</html>
